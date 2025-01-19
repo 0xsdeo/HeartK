@@ -850,8 +850,72 @@ function extract_info(data) {
     return extract_data;
 }
 
+function sub_1(arr1) {
+  var arr3 = []
+  arr1.forEach(function (item,index,array) {
+    let start = 0
+    let end = 0
+    if(item.startsWith("'") || item.startsWith('"')){
+        start = 1
+    }
+    if(item.endsWith("'") || item.endsWith('"')){
+        end = 1
+    }
+    arr3.push(item.substring(start,item.length-end))
+  })
+  return arr3
+}
+
+
+function persist_tmp_data(tmp_data) {
+    //遍历所有数据类型
+    for (var i = 0; i < key.length; i++) {
+        //如果传入的数据没有这个类型，就看下一个
+        if (tmp_data[key[i]] == null){
+          continue;
+        }
+        // 把前端的处理放到这里避免重复
+        if (not_sub_key.indexOf(key[i])<0){
+          tmp_data[key[i]] = sub_1(tmp_data[key[i]])
+        }
+        //如果search_data有历史数据，进行检查--20230625 这里没看懂，先注释看看
+        // console.log(tmp_data[key[i]])
+        // if (tmp_data['current'] in search_data){
+        //   for (var j = 0; j < key.length; j++) {
+        //     if (search_data[tmp_data['current']][key[j]]!=null){
+        //       tmp_data[key[i]] = jiaoji(unique(tmp_data[key[i]]),find(unique(tmp_data[key[i]]),search_data[tmp_data['current']][key[j]]))
+        //     }
+        //     // console.log(tmp_data[key[i]], search_data[tmp_data['current']][key[j]])
+        //   }
+        // }
+        // console.log(tmp_data[key[i]])
+        // if (tmp_data['current'] in search_data && search_data[tmp_data['current']][key[i]]!=null ){
+        //   var search_data_value = unique(add(search_data[tmp_data['current']][key[i]],tmp_data[key[i]])).sort()
+        //   if ('static' in search_data[tmp_data['current']]){
+        //     var res = collect_static(search_data_value,search_data[tmp_data['current']]['static'])
+        //   }else{
+        //     var res = collect_static(search_data_value,[])
+        //   }
+        //   search_data[tmp_data['current']][key[i]] = res['arr1']
+        //   search_data[tmp_data['current']]['static'] = res['static']
+        // }else{
+        //   var search_data_value = unique(tmp_data[key[i]]).sort()
+        //   if ('static' in search_data[tmp_data['current']]){
+        //     var res = collect_static(search_data_value,search_data[tmp_data['current']]['static'])
+        //   }else{
+        //     var res = collect_static(search_data_value,[])
+        //   }
+        //   search_data[tmp_data['current']]['static'] = unique(res['static'])
+        //   search_data[tmp_data['current']][key[i]] = unique(res['arr1'])
+        // }
+    }
+
+}
+
 function get_info(js) {
     let tmp_data = extract_info(js);
     tmp_data['static'] = null;
+    persist_tmp_data(tmp_data);
     return tmp_data;
 }
+
