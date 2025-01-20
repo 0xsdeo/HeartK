@@ -4,7 +4,7 @@ var js = [];
 var search_data = {};
 var static_file = ['.jpg', '.png', '.gif', '.css', '.svg', '.ico', '.js'];
 var non_static_file = ['.jsp']
-var key = ["ip", "ip_port", "domain", "path", "incomplete_path", "url", "sfz", "mobile", "mail", "jwt", "algorithm", "secret"];
+var key = ["ip", "ip_port", "domain", "path", "incomplete_path", "url", "sfz", "mobile", "mail", "jwt", "algorithm", "secret", "static"];
 var not_sub_key = ["secret"];
 var nuclei_regex = [
     /["']?zopim[_-]?account[_-]?key["']?[^\S\r\n]*[=:][^\S\r\n]*["']?[\w-]+["']?/gi,
@@ -851,19 +851,19 @@ function extract_info(data) {
 }
 
 function sub_1(arr1) {
-  var arr3 = []
-  arr1.forEach(function (item,index,array) {
-    let start = 0
-    let end = 0
-    if(item.startsWith("'") || item.startsWith('"')){
-        start = 1
-    }
-    if(item.endsWith("'") || item.endsWith('"')){
-        end = 1
-    }
-    arr3.push(item.substring(start,item.length-end))
-  })
-  return arr3
+    var arr3 = []
+    arr1.forEach(function (item, index, array) {
+        let start = 0
+        let end = 0
+        if (item.startsWith("'") || item.startsWith('"')) {
+            start = 1
+        }
+        if (item.endsWith("'") || item.endsWith('"')) {
+            end = 1
+        }
+        arr3.push(item.substring(start, item.length - end))
+    })
+    return arr3
 }
 
 
@@ -871,12 +871,12 @@ function persist_tmp_data(tmp_data) {
     //遍历所有数据类型
     for (var i = 0; i < key.length; i++) {
         //如果传入的数据没有这个类型，就看下一个
-        if (tmp_data[key[i]] == null){
-          continue;
+        if (tmp_data[key[i]] == null) {
+            continue;
         }
         // 把前端的处理放到这里避免重复
-        if (not_sub_key.indexOf(key[i])<0){
-          tmp_data[key[i]] = sub_1(tmp_data[key[i]])
+        if (not_sub_key.indexOf(key[i]) < 0) {
+            tmp_data[key[i]] = sub_1(tmp_data[key[i]])
         }
         //如果search_data有历史数据，进行检查--20230625 这里没看懂，先注释看看
         // console.log(tmp_data[key[i]])
@@ -912,10 +912,87 @@ function persist_tmp_data(tmp_data) {
 
 }
 
+function init_source(source) {
+    var target_list = [];
+
+    var source_href = source.match(/href=['"].*?['"]/g);
+    var source_src = source.match(/src=['"].*?['"]/g);
+    var script_src = source.match(/<script [^><]*?src=['"].*?['"]/g);
+
+
+    if (source_href) {
+        for (var i = 0; i < source_href.length; i++) {
+            var u = source_href[i].substring(6, source_href[i].length - 1);
+            target_list.push(u);
+        }
+    }
+
+    if (source_src) {
+        for (var i = 0; i < source_src.length; i++) {
+            var u = source_src[i].substring(5, source_src[i].length - 1);
+            target_list.push(u);
+        }
+    }
+
+    if (script_src) {
+        for (var i = 0; i < script_src.length; i++) {
+            var u = script_src[i].match(/src=['"](.*?)['"]/)[1];
+            target_list.push(u);
+        }
+    }
+
+    const tmp_target_list = [];
+    for (var i = 0; i < target_list.length; i++) {
+        if (tmp_target_list.indexOf(target_list[i]) === -1) {
+            tmp_target_list.push(target_list[i]);
+        }
+    }
+
+    return target_list;
+}
+
+function collect_static(arr1, arr2) {
+    var arr3 = arr1.slice(0, arr1.length);
+    arr1.forEach(function (item, index, array) {
+        for (var i = 0; i < static_file.length; i++) {
+            if (item.indexOf(static_file[i]) != -1) {
+                if (static_file[i] == '.js' && item.indexOf('.jsp') != -1) {
+                    continue
+                }
+                arr3.splice(arr3.indexOf(item), 1)
+                if (arr2.indexOf(item) == -1) {
+                    arr2.push(item)
+                }
+            }
+        }
+    })
+    return {'arr1': arr3, 'static': arr2}
+}
+
 function get_info(js) {
-    let tmp_data = extract_info(js);
-    tmp_data['static'] = null;
+    let temp_key = ['domain', 'path', 'url'];
+    let tmp_data = extract_info(js); // 敏感信息，除static
+
+    let temp_data = init_source(js); // 返回数组
+    let static_data = [];
+    if (temp_data.length !== 0) {
+        static_data = static_data.concat(collect_static(temp_data, static_data)['static']); // 取static
+    }
+
+
+    for (let i = 0; i < temp_key.length; i++) {
+        if (tmp_data[temp_key[i]] != null) {
+            static_data = static_data.concat(collect_static(tmp_data[temp_key[i]], static_data)['static']);
+        }
+    }
+
+    for (let i = 0; i < temp_key.length; i++) {
+        if (tmp_data[temp_key[i]] != null) {
+            tmp_data[temp_key[i]] = collect_static(tmp_data[temp_key[i]], static_data)['arr1'];
+        }
+    }
+
+    tmp_data['static'] = static_data;
     persist_tmp_data(tmp_data);
     return tmp_data;
 }
-
