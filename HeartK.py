@@ -100,7 +100,7 @@ if __name__ == "__main__":
    \ \__\ \__\   \ \_______\   \ \__\ \__\   \ \__\\ _\        \ \__\   \ \__\\ \__\
     \|__|\|__|    \|_______|    \|__|\|__|    \|__|\|__|        \|__|    \|__| \|__|""")
 
-    arg = argparse.ArgumentParser(description="FindSomething本地移植版  HeartK")
+    arg = argparse.ArgumentParser(description="FindSomething本地移植版--HeartK")
     arg.add_argument("path", help="指定要扫描的路径或单个js/html文件路径，必选项")
     arg.add_argument('-d', action="store_true", help="输出详细信息，可选项")
     arg.add_argument("-e", "--export", required=False, help="指定要导出报告的路径，不指定默认导出在运行工具的目录下，可选项")

@@ -992,7 +992,12 @@ function get_info(js) {
         }
     }
 
-    tmp_data['static'] = static_data;
+    if (static_data.length === 0) {
+        tmp_data['static'] = null;
+    }
+    else{
+        tmp_data['static'] = static_data;
+    }
     persist_tmp_data(tmp_data);
     return tmp_data;
 }
