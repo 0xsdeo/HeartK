@@ -7,7 +7,7 @@
 ## 必看说明
 
 1. 本项目基于node.js环境，如无node.js环境请自行安装，官网：`https://nodejs.org/zh-cn/download/`
-2. 工具扫描完毕后会将敏感信息导出在指定的目录或工具根目录下的`report.html`
+2. 工具扫描完毕后会将敏感信息导出在指定的目录或运行工具的目录下的`report.html`中。
 
 ## 快速上手
 
