@@ -16,21 +16,21 @@
 
 使用时必须指定要扫描的目录或单个html、js文件：
 ```shell
-HeartK.py path
+HeartK.py scan_path
 ```
 
 输出详细信息指定-d，可选项：
 ```shell
-HeartK.py -d
+HeartK.py scan_path -d
 ```
 
 指定要导出报告的路径，不指定默认导出在运行工具的目录下，可选项：
 ```shell
-HeartK.py -e path
+HeartK.py scan_path -e export_path
 ```
 或
 ```shell
-HeartK.py --export path
+HeartK.py scan_path --export export_path
 ```
 
 ## 注意事项
