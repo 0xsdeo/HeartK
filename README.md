@@ -51,3 +51,9 @@ HeartK.py --export path
 ## Contact
 
 如有bug或其他问题可提交issues，或者关注公众号Spade sec联系我。
+
+## 更新历史
+
+- v1.0.1
+
+> 当遇到无法解码的字节时，忽略掉这些无法解码的字节，以防止文件读不完整。

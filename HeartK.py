@@ -55,7 +55,7 @@ def scan(scan_list):
                 encoding = Detection_encoding(i)
                 if encoding is not None:
                     try:
-                        with open(f"{i}", "r", encoding=encoding) as f:
+                        with open(f"{i}", "r", encoding=encoding, errors='ignore') as f:
                             info = background_js.call("get_info", f.read())
                             js_info_list.append(info)
                             if arg.d:
@@ -70,7 +70,7 @@ def scan(scan_list):
             encoding = Detection_encoding(scan_list)
             if encoding is not None:
                 try:
-                    with open(f"{scan_list}", "r", encoding=encoding) as f:
+                    with open(f"{scan_list}", "r", encoding=encoding, errors='ignore') as f:
                         info = background_js.call("get_info", f.read())
                         js_info_list.append(info)
                 except UnicodeDecodeError as u:
@@ -168,6 +168,6 @@ if __name__ == "__main__":
               (str(len(all_info['secret'])) + '个secret\t' if all_info['secret'] is not None else "0个secret\t") +
               (str(len(all_info['static'])) + '个static\t' if all_info['static'] is not None else "0个static\t")
               )
-        print("\033[0m",end="")
+        print("\033[0m", end="")
 
     export(json.dumps(all_info), arg.export)
