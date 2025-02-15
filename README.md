@@ -4,7 +4,7 @@
 
 ## 项目介绍
 
-本项目基于残笑大佬的<a href="https://github.com/momosecurity/FindSomething">FindSomething</a>插件进行的本地移植版，可对指定的目录下的所有html、js文件或单个html、js文件进行扫描并获取敏感信息，也可对指定的站点列表进行批量扫描.
+本项目基于残笑大佬的<a href="https://github.com/momosecurity/FindSomething">FindSomething</a>插件进行的本地移植版，可对指定的目录下的所有html、js文件或单个html、js文件进行扫描并获取敏感信息，也可对指定的站点列表进行批量扫描。
 
 ## 必看说明
 
@@ -13,7 +13,7 @@
 3. 使用前请在工具根目录执行`pip install -r requirements.txt`安装依赖文件。
 4. 如果没有指定导出报告的路径，批量扫描网站后的报告会自动保存到工具目录下的`web_reports`文件夹下。
 5. 在config中可修改wait_time(请求网站的超时时间，默认为5秒，5秒未响应自动跳过)和请求头headers。
-6. 进行批量扫描时将站点导入到一个文本文件中，该文本文件具有以下格式要求：
+6. 进行批量扫描前将要扫描的站点导入到一个文本文件中，该文本文件需具有以下格式：
 > 1. 每个站点需独占一行。
 > 2. 每个站点必须有协议头，也就是形如`http://xxx.xxx.com`的格式。
 
