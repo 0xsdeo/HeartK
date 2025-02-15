@@ -5,10 +5,42 @@
 # Date     ：2025/1/17 14:48
 import os
 import json
+import config
 import execjs
 import chardet
+import urllib3
+import requests
 import argparse
+import web_scan
+import get_data
 from export_report import export
+
+urllib3.disable_warnings()
+
+
+def web_js_scan(scan_list, code_list):
+    with open("js/background.js", "r", encoding="utf-8") as background:
+        background_js = execjs.compile(background.read())
+        for i in scan_list:
+            try:
+                re = requests.get(i, headers=config.headers, verify=False, timeout=config.wait_time)
+                info = background_js.call("get_info", re.text)
+                js_info_list.append(info)
+                if arg.d:
+                    print_data_count(i, info)
+            except Exception as e:
+                if 'HTTPSConnectionPool' in str(e) or 'HTTPConnectionPool' in str(e):
+                    print(f"26行{i}请求失败")
+                else:
+                    print(f"35行异常，异常信息：{e}")
+        for i in code_list:
+            try:
+                info = background_js.call("get_info", i)
+                js_info_list.append(info)
+                # if arg.d:
+                #     print_data_count(i, info)
+            except Exception as e:
+                print(f"43行异常，异常信息：{e}")
 
 
 def print_data_count(js, data):
@@ -63,7 +95,7 @@ def scan(scan_list):
                     except UnicodeDecodeError as u:
                         print(f"{i}文件编码获取失败，异常信息：{u}")
                     except Exception as e:
-                        print(f"66行异常，异常信息：{e}")
+                        print(f"98行异常，异常信息：{e}")
                 else:
                     print(f"{i}文件内容为空")
         else:
@@ -76,7 +108,7 @@ def scan(scan_list):
                 except UnicodeDecodeError as u:
                     print(f"{scan_list}文件编码获取失败：,{u}")
                 except Exception as e:
-                    print(f"79行异常，异常信息：{e}")
+                    print(f"111行异常，异常信息：{e}")
             else:
                 print(f"{scan_list}文件内容为空")
 
@@ -101,7 +133,7 @@ if __name__ == "__main__":
     \|__|\|__|    \|_______|    \|__|\|__|    \|__|\|__|        \|__|    \|__| \|__|""")
 
     arg = argparse.ArgumentParser(description="FindSomething本地移植版--HeartK")
-    arg.add_argument("path", help="指定要扫描的路径或单个js/html文件路径，必选项")
+    arg.add_argument("path", help="指定要扫描的目录、js/html文件或存储了站点列表的文本文件，必选项")
     arg.add_argument('-d', action="store_true", help="输出详细信息，可选项")
     arg.add_argument("-e", "--export", required=False, help="指定要导出报告的路径，不指定默认导出在运行工具的目录下，可选项")
     arg = arg.parse_args()
@@ -138,17 +170,44 @@ if __name__ == "__main__":
         for k in all_info.keys():
             Data_Deduplication(k, all_info)
     elif os.path.isfile(arg.path):
-        scan(arg.path)
-        for i in js_info_list:
-            for k, v in i.items():
-                add_data(k, v, all_info)
-        if all_info['domain'] is not None and isinstance(all_info['domain'], list):
-            if all_info['url'] is not None:
-                all_info['url'].extend(all_info['domain'])
+        if arg.path[-5:] == '.html' or arg.path[-3:] == '.js':
+            scan(arg.path)
+            for i in js_info_list:
+                for k, v in i.items():
+                    add_data(k, v, all_info)
+            if all_info['domain'] is not None and isinstance(all_info['domain'], list):
+                if all_info['url'] is not None:
+                    all_info['url'].extend(all_info['domain'])
+                else:
+                    all_info['url'] = all_info['domain']
+            for k in all_info.keys():
+                Data_Deduplication(k, all_info)
+        else:
+            website_list = get_data.generate_data(arg.path)
+            if len(website_list) != 0:
+                for i in website_list:
+                    web_js_list, js_code_list = web_scan.get_host_js(i)
+                    if web_js_list:
+                        web_js_scan(web_js_list, js_code_list)
+                        for j in js_info_list:
+                            for k, v in j.items():
+                                add_data(k, v, all_info)
+                        if all_info['domain'] is not None and isinstance(all_info['domain'], list):
+                            if all_info['url'] is not None:
+                                all_info['url'].extend(all_info['domain'])
+                            else:
+                                all_info['url'] = all_info['domain']
+                        for k in all_info.keys():
+                            Data_Deduplication(k, all_info)
+                    print_data_count(i, all_info)
+                    hostname = web_scan.get_hostname(i)
+                    export(json.dumps(all_info), arg.export, hostname)
+                    for k in all_info.keys():
+                        all_info[k] = None
+                    js_info_list = list()
             else:
-                all_info['url'] = all_info['domain']
-        for k in all_info.keys():
-            Data_Deduplication(k, all_info)
+                print(f"{arg.path}未读取到有效数据")
+            quit()
     else:
         raise ValueError("指定的扫描路径并非有效路径")
 

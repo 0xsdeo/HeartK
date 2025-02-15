@@ -6,7 +6,7 @@
 import os
 
 
-def export(data, export_path):
+def export(data, export_path, host=""):
     popup_js = r"""
     // @Date    : 2020-09-12 16:26:48
     // @Author  : residuallaugh
@@ -190,13 +190,32 @@ def export(data, export_path):
 </html>
 """
 
-    if export_path:
+    if export_path and host == '':
         if os.path.isdir(export_path):
             with open(export_path + "/report.html", "w", encoding="utf-8") as report:
                 report.write(report_html)
             print(f"报告已导出在{export_path}/report.html")
         else:
             raise ValueError("指定的导出报告路径并非有效路径")
+    elif host != '':
+        if export_path:
+            if os.path.isdir(export_path):
+                with open(export_path + f"/{host}.html", "w", encoding="utf-8") as report:
+                    report.write(report_html)
+                print(f'\033[31m', end="")
+                print(f"报告已导出在{export_path}/{host}.html")
+                print("\033[0m", end="")
+            else:
+                raise ValueError("指定的导出报告路径并非有效路径")
+        else:
+            path = "web_reports"
+            if not os.path.exists(path):
+                os.makedirs(path)
+            with open(f"web_reports/{host}.html", "w", encoding="utf-8") as report:
+                report.write(report_html)
+            print(f'\033[31m', end="")
+            print(f"报告已导出在{os.getcwd()}/web_reports/{host}.html")
+            print("\033[0m", end="")
     else:
         with open("report.html", "w", encoding="utf-8") as report:
             report.write(report_html)
