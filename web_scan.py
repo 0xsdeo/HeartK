@@ -63,4 +63,6 @@ def get_hostname(host):
     parsed = urlparse(host)
     netloc = parsed.netloc
     pure_domain = netloc.split(":")[0] if ":" in netloc else netloc
+    if parsed.port:
+        pure_domain = pure_domain + "_" + str(parsed.port)
     return pure_domain
