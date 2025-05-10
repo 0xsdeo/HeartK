@@ -66,6 +66,12 @@ HeartK.py scan_path --export export_path
 
 ## 更新历史
 
+- v1.1.1
+
+> 修复了<a href="https://github.com/0xsdeo/HeartK/issues/3">输出的报告文件命名不规范</a>的问题，现扫描同个ip的不同端口的url时，导出的报告文件名会将端口号加在文件名的最后。
+
+感谢`XingHuoLiaoYuanBaby`师傅提出问题。
+
 - v1.1.0
 
 > 新增网站批量扫描功能，支持从指定站点列表中请求并扫描获取敏感信息。
